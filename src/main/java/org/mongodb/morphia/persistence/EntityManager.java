@@ -45,23 +45,20 @@ public class EntityManager implements javax.persistence.EntityManager {
 
     @Override
     public boolean contains(final Object entity) {
-        return false;
+        return null != db.exists(entity);
     }
 
     private MongoClient createClient(final PersistenceUnit persistenceUnit) throws PersistenceException {
-        MongoClient mongoClient;
         try {
-            mongoClient = new MongoClient(persistenceUnit.host(), persistenceUnit.port());
+            return new MongoClient(persistenceUnit.host(), persistenceUnit.port());
         } catch (final UnknownHostException e) {
             throw new PersistenceException(e.getMessage(), e);
         }
-        return mongoClient;
     }
 
     private Datastore createDatastore(final PersistenceUnit persistenceUnit, final MongoClient mongoClient)
         throws PersistenceException {
         final Morphia morphia = new Morphia();
-        final Datastore db = morphia.createDatastore(mongoClient, persistenceUnit.database());
         if (null != persistenceUnit.mapPackage()) {
             morphia.mapPackage(persistenceUnit.mapPackage(),
                                null == persistenceUnit.mapPackage() ? true : persistenceUnit.ignoreInvalid());
@@ -75,7 +72,7 @@ public class EntityManager implements javax.persistence.EntityManager {
                 }
             }
         }
-        return db;
+        return morphia.createDatastore(mongoClient, persistenceUnit.database());
     }
 
     @Override
