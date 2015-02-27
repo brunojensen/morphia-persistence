@@ -7,6 +7,7 @@ import javax.xml.bind.JAXBContext;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.persistence.util.PersistenceUnitInfo;
+import org.mongodb.morphia.persistence.util.PropertyResolver;
 import com.sun.java.xml.ns.persistence.Persistence;
 import com.sun.java.xml.ns.persistence.Persistence.PersistenceUnit.Properties;
 
@@ -65,15 +66,15 @@ final class PersistenceUnit implements Serializable {
     }
 
     String database() {
-        return properties.getProperty("mongodb.database.name");
+        return PropertyResolver.resolve(properties.getProperty("mongodb.database.name"));
     }
 
     String host() {
-        return properties.getProperty("mongodb.database.host");
+        return PropertyResolver.resolve(properties.getProperty("mongodb.database.host"));
     }
 
     boolean ignoreInvalid() {
-        return Boolean.valueOf(properties.getProperty("mongodb.morphia.ignore_invalid"));
+        return Boolean.valueOf(PropertyResolver.resolve(properties.getProperty("mongodb.morphia.ignore_invalid")));
     }
 
     boolean load() throws Exception {
@@ -112,11 +113,11 @@ final class PersistenceUnit implements Serializable {
     }
 
     String mapPackage() {
-        return properties.getProperty("mongodb.morphia.package");
+        return PropertyResolver.resolve(properties.getProperty("mongodb.morphia.package"));
     }
 
     int port() {
-        return Integer.valueOf(properties.getProperty("mongodb.database.port"));
+        return Integer.valueOf(PropertyResolver.resolve(properties.getProperty("mongodb.database.port")));
     }
 
     final Properties properties() {
