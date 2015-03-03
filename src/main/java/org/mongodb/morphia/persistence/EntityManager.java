@@ -1,6 +1,7 @@
 package org.mongodb.morphia.persistence;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
@@ -16,6 +17,8 @@ import javax.persistence.metamodel.Metamodel;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 
 public class EntityManager implements javax.persistence.EntityManager {
 
@@ -38,7 +41,7 @@ public class EntityManager implements javax.persistence.EntityManager {
     public void close() {
         synchronized (this) {
             db.getMongo()
-              .close();
+            .close();
             open = false;
         }
     }
@@ -50,6 +53,13 @@ public class EntityManager implements javax.persistence.EntityManager {
 
     private MongoClient createClient(final PersistenceUnit persistenceUnit) throws PersistenceException {
         try {
+            if (null != persistenceUnit.userName()) {
+                return new MongoClient(new ServerAddress(persistenceUnit.host(), persistenceUnit.port()),
+                                       Arrays.asList(MongoCredential.createMongoCRCredential(persistenceUnit.userName(),
+                                                                                             persistenceUnit.database(),
+                                                                                             persistenceUnit.password()
+                                                                                                            .toCharArray())));
+            }
             return new MongoClient(persistenceUnit.host(), persistenceUnit.port());
         } catch (final UnknownHostException e) {
             throw new PersistenceException(e.getMessage(), e);
@@ -63,7 +73,7 @@ public class EntityManager implements javax.persistence.EntityManager {
             morphia.mapPackage(persistenceUnit.mapPackage(),
                                null == persistenceUnit.mapPackage() ? true : persistenceUnit.ignoreInvalid());
         } else if (null != persistenceUnit.classes() && !persistenceUnit.classes()
-            .isEmpty()) {
+                                                                        .isEmpty()) {
             for (final String clazz : persistenceUnit.classes()) {
                 try {
                     morphia.map(Class.forName(clazz));
